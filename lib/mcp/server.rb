@@ -155,7 +155,28 @@ module MCP
     end
 
     def handle_initialize(request)
-      return error_response(request[:id], Constants::ErrorCodes::ALREADY_INITIALIZED, "Server already initialized") if @initialized
+      # return error_response(request[:id], Constants::ErrorCodes::ALREADY_INITIALIZED, "Server already initialized") if @initialized
+      # 適当な値を返す
+      return {
+        jsonrpc: MCP::Constants::JSON_RPC_VERSION,
+        id: request[:id],
+        result: {
+          protocolVersion: Constants::PROTOCOL_VERSION,
+          capabilities: {
+            resources: {
+              subscribe: false,
+              listChanged: false
+            },
+            tools: {
+              listChanged: false
+            }
+          },
+          serverInfo: {
+            name: @name,
+            version: @version
+          }
+        }
+      } if @initialized
 
       client_version = request.dig(:params, :protocolVersion)
       unless Constants::SUPPORTED_PROTOCOL_VERSIONS.include?(client_version)
@@ -193,7 +214,7 @@ module MCP
     end
 
     def handle_initialized(request)
-      return error_response(request[:id], Constants::ErrorCodes::ALREADY_INITIALIZED, "Server already initialized") if @initialized
+      # return error_response(request[:id], Constants::ErrorCodes::ALREADY_INITIALIZED, "Server already initialized") if @initialized
 
       @initialized = true
       nil  # 通知に対しては応答を返さない
